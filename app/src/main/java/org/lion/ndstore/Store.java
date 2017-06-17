@@ -1,21 +1,18 @@
 package org.lion.ndstore;
 
 public class Store {
-    static {
-        System.loadLibrary("store");
-    }
 
-    public  int getInteger(String pKey){
-        return 0;
-    }
-    public  void setInteger(String pKey, int pInt){
+    public native int getInteger(String pKey);
+
+    public void setInteger(String pKey, int pInt) {
 
     }
 
-    public  String getString(String pKey){
-        return "";
+    public String getString(String pKey) {
+        return null;
     }
-    public  void setString(String pKey, String pString){
+
+    public void setString(String pKey, String pString) {
 
     }
 }

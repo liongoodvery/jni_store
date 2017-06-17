@@ -1,7 +1,6 @@
 //
 // Created by lion on 17-6-17.
 //
-#undef __cplusplus
 
 #include "Store.h"
 #include <string.h>
@@ -26,19 +25,40 @@ StoreEntry *allocateEntry(JNIEnv *pEnv, Store *pStore, jstring pKey) {
         lEntry = pStore->mEntries + pStore->mLength;
 
         const char *lKeyTmp =
-                (*pEnv)->GetStringUTFChars(pEnv, pKey, NULL);
+                (*pEnv).GetStringUTFChars(pKey, NULL);
         if (lKeyTmp == NULL) {
             return NULL;
         }
         lEntry->mKey = (char *) malloc(strlen(lKeyTmp));
         strcpy(lEntry->mKey, lKeyTmp);
-        (*pEnv)->ReleaseStringUTFChars(pEnv, pKey, lKeyTmp);
+        (*pEnv).ReleaseStringUTFChars(pKey, lKeyTmp);
         ++pStore->mLength;
     }
     return lEntry;
 }
 
-StoreEntry *findEntry(JNIEnv *pEnv, Store *pStore, jstring pKey, int32_t *pError);
+StoreEntry *findEntry(JNIEnv *pEnv, Store *pStore, jstring pKey, int32_t *pError) {
+    StoreEntry *lEntry = pStore->mEntries;
+    StoreEntry *lEntryEnd = pStore->mEntries + pStore->mLength;
+    const char *lKeyTmp = (*pEnv).GetStringUTFChars(pKey, NULL);
+    if (lKeyTmp == NULL) {
+        if (pError != NULL) {
+            *pError = 1;
+        }
+        return NULL;
+    }
+    while ((lEntry < lEntryEnd)
+           && (strcmp(lEntry->mKey, lKeyTmp) != 0)) {
+        ++lEntry;
+    }
+    return (lEntry == lEntryEnd) ? NULL : lEntry;
+}
 
-void releaseEntryValue(JNIEnv *pEnv, StoreEntry *pEntry);
+void releaseEntryValue(JNIEnv *pEnv, StoreEntry *pEntry) {
+    switch (pEntry->mType) {
+        case StoreType_String:
+            free(pEntry->mValue.mString);
+            break;
+    }
+}
 
